@@ -42,3 +42,109 @@
 31
 */
 
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+)
+
+// inputing считывает данные и возвращает введённые значения
+func inputing(sc *bufio.Scanner) (int, int, []int, int) {
+
+	// считываем ввод с первой строки
+	sc.Scan()
+	inputOne := strings.Split(sc.Text(), " ")
+	// парсим входные данные
+	// количество сотрудников
+	n, err := strconv.Atoi(inputOne[0])
+	// время хуода сотрудника workerOut
+	timeOut, err := strconv.Atoi(inputOne[1])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// floorNumbers слайс с номерами этажей, которые надо посетить
+	floorNumbers := make([]int, 0, n)
+	// добавим по нулевому индексу значение, чтобы в будущем не путаться с номерами этажей
+	floorNumbers = append(floorNumbers, 0)
+	// считываем ввод со второй строки
+	sc.Scan()
+	inputTwo := strings.Split(sc.Text(), " ")
+	// парсим входные данные и пишем в floorNumbers
+	for i := 0; i < n; i++ {
+		num, err := strconv.Atoi(inputTwo[i])
+		if err != nil {
+			log.Fatal(err)
+		}
+		floorNumbers = append(floorNumbers, num)
+	}
+
+	// считываем ввод с третьей строки
+	sc.Scan()
+	// номер сотрудника, который уйдёт через timeOut минут
+	workerOut, err := strconv.Atoi(sc.Text())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return n, timeOut, floorNumbers, workerOut
+}
+
+// calculation вычисляет минимальное количество пролётов
+func calculation(n, timeOut, workerOut int, floorNumbers []int) int {
+
+	// для начала x это разница между максимумом и минимумом
+	x := floorNumbers[len(floorNumbers)-1] - floorNumbers[1]
+
+	downX := floorNumbers[workerOut] - floorNumbers[1]                 // количество пролётов от нижнего этажа до ухожденца
+	upX := floorNumbers[len(floorNumbers)-1] - floorNumbers[workerOut] // количество пролётов от ухожденца до верхнего этажа
+
+	// если можно подняться вовремя от нижнего сотрудника, то просто идём снизу через все этажи
+	if downX < timeOut {
+		return x
+	}
+	// если можно спуститься вовремя от верхнего сотрудника, то просто спускаемся сверху через все этажи
+	if upX < timeOut {
+		return x
+	}
+	// если ни подняться от нижнего сотрудника, ни спуститься от верхнего вовремя не удаётся,
+	// идём сначала к уходящему, потом в сторону ближнего края, а потом в противоположный край
+	if downX >= upX {
+		x += upX
+	} else {
+		x += downX
+	}
+
+	return x
+}
+
+// outputing выводит результат
+func outputing(out *bufio.Writer, x int) {
+
+	fmt.Fprintf(out, "%v", x)
+}
+
+func main() {
+
+	// определяем ввод
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Split(bufio.ScanLines)
+
+	// определяем вывод
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	// считываем введенные данные
+	n, timeOut, floorNumbers, workerOut := inputing(scanner)
+
+	// вычисляем минимальное количество пролётов
+	x := calculation(n, timeOut, workerOut, floorNumbers)
+
+	// выводим результат
+	outputing(out, x)
+}
