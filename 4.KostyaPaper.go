@@ -153,14 +153,14 @@ func calculation(limitOperations int, numbers []int) int {
 		// меняем каждую цифру числа и подсчитываем изменение суммы
 		for j := 0; j < len(digits); j++ {
 			// если цифра разряда максимальна, то менять нечего
-			if digits[i] != 9 {
-				currentDigit = digits[i]                // сохраняем цифру для возврата после проверки замены
-				digits[i] = 9                           // заменяем цифру на максимально возможную
+			if digits[j] != 9 {
+				currentDigit = digits[j]                // сохраняем цифру для возврата после проверки замены
+				digits[j] = 9                           // заменяем цифру на максимально возможную
 				newNumber = collectNumber(digits)       // собираем число с заменой
 				endSum += newNumber                     // вычисляем новое значение суммы
 				deltaMax = endSum - beginSum            // вычисляем разность сумм до и после изменнения
 				different = append(different, deltaMax) // добавляем результат в хранилище разностей
-				digits[i] = currentDigit                // возвращаем цифру после проверки замены
+				digits[j] = currentDigit                // возвращаем цифру после проверки замены
 			}
 		}
 	}
@@ -187,7 +187,7 @@ func main() {
 	// считываем введенные данные
 	limitOperations, numbers := inputing(scanner)
 
-	// вычисляем минимальное количество пролётов
+	// вычисляем максимальную разницу
 	x := calculation(limitOperations, numbers)
 
 	// выводим результат
