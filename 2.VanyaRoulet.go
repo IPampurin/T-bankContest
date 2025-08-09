@@ -27,3 +27,66 @@
 5
 3
 */
+
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+)
+
+// inputing считывает данные и возвращает введённые значения
+func inputing(sc *bufio.Scanner) int {
+
+	// считываем ввод
+	sc.Scan()
+
+	// необходимое количество кусков
+	n, err := strconv.Atoi(sc.Text())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return n
+}
+
+// calculation вычисляет количество разрезов
+func calculation(portion int) int {
+
+	cut := 0   // количество разрезов
+	piece := 1 // количество кусков при cut разрезов
+	for piece < portion {
+		cut += 1
+		piece *= 2
+	}
+	return cut
+}
+
+// outputing выводит результат
+func outputing(out *bufio.Writer, x int) {
+
+	fmt.Fprintf(out, "%v", x)
+}
+
+func main() {
+
+	// пределяем ввод
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Split(bufio.ScanLines)
+
+	// определяем вывод
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	// считываем введенные данные
+	n := inputing(scanner)
+
+	// вычисляем результат
+	x := calculation(n)
+
+	// выводим результат
+	outputing(out, x)
+}
