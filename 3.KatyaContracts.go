@@ -105,16 +105,16 @@ func calculation(n, timeOut, workerOut int, floorNumbers []int) int {
 	upX := floorNumbers[len(floorNumbers)-1] - floorNumbers[workerOut] // количество пролётов от ухожденца до верхнего этажа
 
 	// если можно подняться вовремя от нижнего сотрудника, то просто идём снизу через все этажи
-	if downX < timeOut {
+	if downX <= timeOut {
 		return x
 	}
 	// если можно спуститься вовремя от верхнего сотрудника, то просто спускаемся сверху через все этажи
-	if upX < timeOut {
+	if upX <= timeOut {
 		return x
 	}
 	// если ни подняться от нижнего сотрудника, ни спуститься от верхнего вовремя не удаётся,
 	// идём сначала к уходящему, потом в сторону ближнего края, а потом в противоположный край
-	if downX >= upX {
+	if downX > upX {
 		x += upX
 	} else {
 		x += downX
