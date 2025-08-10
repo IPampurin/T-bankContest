@@ -40,6 +40,8 @@
 0
 */
 
+// Примечание: пакет slices появился в Go 1.21, при версии компилятора 1.20.3 следует пакет slices заменить
+// на пакет sort и поменять "slices.Sort(different)" на "sort.Ints(different)"
 package main
 
 import (
@@ -107,11 +109,6 @@ func destroyNumber(num int) []int {
 		num = num / 10
 	}
 
-	// переворачиваем слайс для наглядности
-	for i, j := 0, len(categories)-1; i < j; i, j = i+1, j-1 {
-		categories[i], categories[j] = categories[j], categories[i]
-	}
-
 	return categories
 }
 
@@ -121,7 +118,7 @@ func collectNumber(nums []int) int {
 	num := 0 // интересующее нас число
 	pow := 1 // степень десятки
 	// собираем число начиная с хвоста слайса
-	for i := len(nums) - 1; i >= 0; i-- {
+	for i := 0; i < len(nums); i++ {
 		num += nums[i] * pow
 		pow *= 10
 	}
@@ -132,13 +129,13 @@ func collectNumber(nums []int) int {
 // calculation вычисляет максимальную разность между начальной и конечной суммами
 func calculation(limitOperations int, numbers []int) int {
 
-	// вычислим сумму чисел до изменений
+	// beginSum сумма чисел до изменений
 	beginSum := sumElements(numbers)
-	// проинициализируем сумму после внесения изменений начальным значением суммы элементов
+	// endSum сумма после внесения изменений
 	endSum := beginSum
-	// максимальная разница между суммами
+	// deltaMax разница между суммами
 	deltaMax := endSum - beginSum
-	// в different будем хранить набор всех deltaMax (разницу сумм после изменения и до изменения)
+	// different служит для хранения набора всех deltaMax (разниц сумм после изменения и до изменения)
 	different := make([]int, 0)
 	different = append(different, deltaMax)
 
@@ -146,9 +143,10 @@ func calculation(limitOperations int, numbers []int) int {
 
 		// убираем из конечной суммы очередное число перед изменениями
 		endSum -= numbers[i]
-		// получаем разбитое на цифры очередное число
+		// digits это разбитое на цифры очередное число
 		digits := destroyNumber(numbers[i])
 		// currentDigits переменная для сохранения текущей цифры
+		// newNumber это число после внесения изменений
 		var currentDigit, newNumber int
 		// меняем каждую цифру числа и подсчитываем изменение суммы
 		for j := 0; j < len(digits); j++ {
@@ -159,13 +157,27 @@ func calculation(limitOperations int, numbers []int) int {
 				newNumber = collectNumber(digits)       // собираем число с заменой
 				endSum += newNumber                     // вычисляем новое значение суммы
 				deltaMax = endSum - beginSum            // вычисляем разность сумм до и после изменнения
+				endSum -= newNumber                     // возвращаем endSum в состояние до изменения
 				different = append(different, deltaMax) // добавляем результат в хранилище разностей
 				digits[j] = currentDigit                // возвращаем цифру после проверки замены
 			}
 		}
+		// возвращаем endSum в состояние до изменения
+		endSum += numbers[i]
 	}
 
-	return slices.Max(different)
+	// отсортируем, чтобы знать где были самые большие изменения
+	slices.Sort(different)
+
+	// возьмём нужное количество замен с учётом длины результирующего слайса
+	if limitOperations <= len(different) {
+		different = different[len(different)-limitOperations:]
+	}
+
+	// сложим суммы по заданному количеству замен
+	result := sumElements(different)
+
+	return result
 }
 
 // outputing выводит результат
